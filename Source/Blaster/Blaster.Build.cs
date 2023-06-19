@@ -16,7 +16,9 @@ public class Blaster : ModuleRules
 			new string[]
 			{
 				"Blaster",
-				"Blaster/Character"
+				"Blaster/Character",
+				"Blaster/GameMode",
+				"Blaster/HUD"
 			}
 		);
 
