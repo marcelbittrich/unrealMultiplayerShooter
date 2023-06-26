@@ -18,6 +18,10 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* DisplayText;
 
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* NameText;
+
+	void SetNameText(const FString& Name);
 	void SetDisplayText(const FString& TextToDisplay);
 
 	UFUNCTION(BlueprintCallable)

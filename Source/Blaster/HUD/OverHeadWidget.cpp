@@ -4,6 +4,15 @@
 #include "HUD/OverHeadWidget.h"
 
 #include "Components/TextBlock.h"
+#include "GameFramework/PlayerState.h"
+
+void UOverHeadWidget::SetNameText(const FString& Name)
+{
+	if (NameText)
+	{
+		NameText->SetText(FText::FromString(Name));
+	}
+}
 
 void UOverHeadWidget::SetDisplayText(const FString& TextToDisplay)
 {
@@ -15,9 +24,10 @@ void UOverHeadWidget::SetDisplayText(const FString& TextToDisplay)
 
 void UOverHeadWidget::ShowPlayerNetRole(APawn* InPawn)
 {
-	ENetRole RemoteRole = InPawn->GetRemoteRole();
+	// Configure Network Role Text
+	ENetRole NetRole = InPawn->GetLocalRole();
 	FString Role;
-	switch (RemoteRole)
+	switch (NetRole)
 	{
 	case ROLE_Authority:
 		Role = FString("Authority");
@@ -35,8 +45,16 @@ void UOverHeadWidget::ShowPlayerNetRole(APawn* InPawn)
 		Role = FString("Default");
 		break;
 	}
-	FString RemoteRoleString = FString::Printf(TEXT("Remote Role: %s"), *Role);
-	SetDisplayText(RemoteRoleString);
+	FString RoleString = FString::Printf(TEXT("Local Role: %s"), *Role);
+	SetDisplayText(RoleString);
+
+	// Set Player Name
+	APlayerState* PlayerState = GetOwningPlayerState();
+	if (PlayerState)
+	{
+		FString Name = PlayerState->GetPlayerName();
+		SetNameText(Name);
+	}
 }
 
 void UOverHeadWidget::NativeConstruct()
