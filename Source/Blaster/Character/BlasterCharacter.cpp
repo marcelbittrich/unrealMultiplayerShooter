@@ -3,6 +3,7 @@
 
 #include "Character/BlasterCharacter.h"
 
+#include "CombatComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputTriggers.h"
@@ -33,6 +34,9 @@ ABlasterCharacter::ABlasterCharacter()
 
 	OverHeadWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("OverheadWidget"));
 	OverHeadWidgetComponent->SetupAttachment(RootComponent.Get());
+
+	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
+	CombatComponent->SetIsReplicated(true);
 }
 
 void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -40,6 +44,16 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);
+}
+
+void ABlasterCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	if (CombatComponent)
+	{
+		CombatComponent->Character = this;
+	}
 }
 
 void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -58,6 +72,9 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 		//Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::Look);
+
+		//Equip
+		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Started, this, &ABlasterCharacter::EquipButtonPressed);
 	}
 
 }
@@ -91,11 +108,53 @@ void ABlasterCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
-void ABlasterCharacter::OnRep_OverlappingWeapon()
+void ABlasterCharacter::EquipButtonPressed()
+{
+	if (CombatComponent && HasAuthority())
+	{
+		CombatComponent->EquipWeapon(OverlappingWeapon);
+	}
+}
+
+void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 {
 	if (OverlappingWeapon)
 	{
-		OverlappingWeapon->ShowPickupWidget(true);
+		OverlappingWeapon->ShowPickupWidget(false);
+	}
+	OverlappingWeapon = Weapon;
+	/* 
+	// We are inside the server here since OnWeaponOverlap in
+	// AWeapon is only called by the server
+	// which calls this function.
+	// IsLocallyControlled() returns true for the character controlled by the listen server.
+	// We do this because Overlapping Weapon is not replicated on the Server - OnRep is not called
+	// if we would not doe the if check, the function would be executed for all connected characters
+	*/
+	if (IsLocallyControlled())
+	{
+		if (OverlappingWeapon && CombatComponent)
+		{
+			if (OverlappingWeapon != CombatComponent->EquippedWeapon)
+			{
+				OverlappingWeapon->ShowPickupWidget(true);
+			}
+		}
+	}
+}
+
+void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
+{
+	if (OverlappingWeapon && CombatComponent)
+	{
+		if (OverlappingWeapon != CombatComponent->EquippedWeapon)
+		{
+			OverlappingWeapon->ShowPickupWidget(true);
+		}
+	}
+	if (LastWeapon)
+	{
+		LastWeapon->ShowPickupWidget(false);
 	}
 }
 
