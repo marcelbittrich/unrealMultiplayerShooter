@@ -32,6 +32,10 @@ class BLASTER_API ABlasterCharacter : public ACharacter
 	/** Equip Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* EquipAction;
+
+	/** Crouch Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* CrouchAction;
 	
 public:
 	ABlasterCharacter();
@@ -46,6 +50,7 @@ protected:
     void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void EquipButtonPressed();
+	void CrouchButtonPressed();
 	
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -65,8 +70,11 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	class UCombatComponent* CombatComponent;
+
+	UFUNCTION(Server, Reliable)
+	void Server_EquipButtonPressed();
 	
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
-
+	bool IsWeaponEquipped();
 };
