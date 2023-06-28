@@ -22,14 +22,24 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	void SetAiming(bool bIsAiming);
 
+	UFUNCTION(Server, Reliable)
+	void Server_SetAiming(bool bIsAiming);
+
+	UFUNCTION()
+	void OnRep_EquippedWeapon();
+	
 private:
 	UPROPERTY()
 	class ABlasterCharacter* Character;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 	AWeapon* EquippedWeapon;
 
+	UPROPERTY(Replicated)
+	bool bAiming;
+	
 public:	
 	
 
