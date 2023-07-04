@@ -20,7 +20,8 @@ public class Blaster : ModuleRules
 				"Blaster/GameMode",
 				"Blaster/HUD",
 				"Blaster/Weapon",
-				"Blaster/BlasterComponents"
+				"Blaster/BlasterComponents",
+				"Blaster/BlasterTypes"
 			}
 		);
 
