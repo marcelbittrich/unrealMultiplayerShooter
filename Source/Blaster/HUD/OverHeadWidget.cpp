@@ -57,6 +57,18 @@ void UOverHeadWidget::ShowPlayerNetRole(APawn* InPawn)
 	}
 }
 
+void UOverHeadWidget::ShowPlayerName(APawn* InPawn)
+{
+	// Set Player Name
+	APlayerState* PlayerState = GetOwningPlayerState();
+	if (PlayerState)
+	{
+		FString Name = PlayerState->GetPlayerName();
+		SetNameText(Name);
+		SetDisplayText(FString(""));
+	}
+}
+
 void UOverHeadWidget::NativeConstruct()
 {
 	RemoveFromParent();
