@@ -4,11 +4,13 @@
 #include "BlasterComponents/CombatComponent.h"
 
 #include "BlasterCharacter.h"
+#include "BlasterHUD.h"
 #include "Weapon.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "PlayerController/BlasterPlayerController.h"
 
 UCombatComponent::UCombatComponent()
 {
@@ -39,6 +41,34 @@ void UCombatComponent::BeginPlay()
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	SetHUDCrosshairs(DeltaTime);
+}
+
+void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
+{
+	if (!Character || !(Character->Controller)) return;
+	Controller = (Controller == nullptr) ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
+	if (Controller)
+	{
+		HUD = (HUD == nullptr) ? Cast<ABlasterHUD>(Controller->GetHUD()) : HUD;
+		if (HUD)
+		{
+			FHUDPackage HUDPackage;
+			if (EquippedWeapon)
+			{
+				HUDPackage = EquippedWeapon->GetCrosshairs();
+			}
+			else
+			{
+				HUDPackage.CrosshairsCenter	= nullptr;
+				HUDPackage.CrosshairsTop	= nullptr;
+				HUDPackage.CrosshairsBottom	= nullptr;
+				HUDPackage.CrosshairsRight	= nullptr;
+				HUDPackage.CrosshairsLeft	= nullptr;
+			}
+			HUD->SetHUDPackage(HUDPackage);
+		}
+	}
 }
 
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
