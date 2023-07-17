@@ -365,4 +365,10 @@ AWeapon* ABlasterCharacter::GetEquippedWeapon()
 	return CombatComponent->EquippedWeapon;
 }
 
+FVector ABlasterCharacter::GetHitTarget() const
+{
+	if (!CombatComponent) return FVector();
+	return CombatComponent->HitTarget;
+}
+
 
