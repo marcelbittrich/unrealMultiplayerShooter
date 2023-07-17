@@ -6,6 +6,7 @@
 #include "BlasterCharacter.h"
 #include "BlasterHUD.h"
 #include "Weapon.h"
+#include "Camera/CameraComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -35,6 +36,12 @@ void UCombatComponent::BeginPlay()
 	if (Character)
 	{
 		Character->GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
+
+		if (Character->GetFollowCamera())
+		{
+			DefaultFOV = Character->GetFollowCamera()->FieldOfView;
+			CurrentFOV = DefaultFOV;
+		}
 	}
 }
 
@@ -42,12 +49,18 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	
-	SetHUDCrosshairs(DeltaTime);
 	if (Character && Character->IsLocallyControlled())
 	{
+		// Crosshair appearance
+		SetHUDCrosshairs(DeltaTime);
+
+		// HitTarget for right hand rotation
 		FHitResult HitResult;
 		TraceUnderCrosshairs(HitResult);
 		HitTarget = HitResult.ImpactPoint;
+
+		// Change FOV based on bAiming
+		InterpFOV(DeltaTime);
 	}
 }
 
@@ -101,6 +114,26 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 			HUD->SetHUDPackage(HUDPackage);
 		}
 	}
+}
+
+void UCombatComponent::InterpFOV(float DeltaTime)
+{
+	if (!EquippedWeapon || !Character || !Character->GetFollowCamera()) return;
+
+	float FocalDistance = 0.f;
+	
+	if (bAiming)
+	{
+		CurrentFOV = FMath::FInterpTo(CurrentFOV, EquippedWeapon->GetZoomedFOV(), DeltaTime, EquippedWeapon->GetZoomInterpSpeed());
+		FocalDistance = FVector::Distance(Character->GetFollowCamera()->GetComponentLocation(), HitTarget);
+	}
+	else
+	{
+		CurrentFOV = FMath::FInterpTo(CurrentFOV, DefaultFOV, DeltaTime, UnZoomInterpSpeed);
+	}
+	
+	Character->GetFollowCamera()->SetFieldOfView(CurrentFOV);
+	Character->GetFollowCamera()->PostProcessSettings.DepthOfFieldFocalDistance = FocalDistance;
 }
 
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
