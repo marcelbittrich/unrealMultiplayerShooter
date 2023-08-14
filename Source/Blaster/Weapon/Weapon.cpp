@@ -144,13 +144,11 @@ void AWeapon::Fire(const FVector& HitTarget)
 	}
 }
 
-FHUDPackage AWeapon::GetCrosshairs()
+void AWeapon::GetCrosshairs(FHUDPackage& HUDPackage)
 {
-	FHUDPackage Package;
-	Package.CrosshairsCenter = CrosshairsCenter;
-	Package.CrosshairsTop = CrosshairsTop;
-	Package.CrosshairsBottom = CrosshairsBottom;
-	Package.CrosshairsLeft = CrosshairsLeft;
-	Package.CrosshairsRight = CrosshairsRight;
-	return Package;
+	HUDPackage.CrosshairsCenter = CrosshairsCenter;
+	HUDPackage.CrosshairsTop = CrosshairsTop;
+	HUDPackage.CrosshairsBottom = CrosshairsBottom;
+	HUDPackage.CrosshairsLeft = CrosshairsLeft;
+	HUDPackage.CrosshairsRight = CrosshairsRight;
 }

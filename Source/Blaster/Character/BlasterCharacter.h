@@ -6,11 +6,12 @@
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "TurningInPlace.h"
+#include "InteractWithCrosshairsInterface.h"
 
 #include "BlasterCharacter.generated.h"
 
 UCLASS()
-class BLASTER_API ABlasterCharacter : public ACharacter
+class BLASTER_API ABlasterCharacter : public ACharacter, public IInteractWithCrosshairsInterface
 {
 	GENERATED_BODY()
 

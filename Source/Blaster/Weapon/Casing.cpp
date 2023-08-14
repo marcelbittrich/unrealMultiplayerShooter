@@ -31,7 +31,7 @@ void ACasing::BeginPlay()
 	float EjectionImpulse = ShellEjectionImpulse + RandomImpulseValue;
 	
 	FRotator RandomRotationOffset = MaxRandomEjectAngle * FRotator(
-		FMath::FRandRange(-1.f,1.f),
+		FMath::FRandRange(-5.f,0.f),
 		FMath::FRandRange(-1.f,1.f),
 		FMath::FRandRange(-1.f,1.f)) ;
 	FVector EjectionDirection = RandomRotationOffset.RotateVector(GetActorForwardVector());

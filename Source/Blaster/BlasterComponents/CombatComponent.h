@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BlasterHUD.h"
 #include "Components/ActorComponent.h"
 #include "CombatComponent.generated.h"
 
@@ -69,12 +70,14 @@ private:
 	/**
 	 * HUD and crosshairs
 	 */
-
 	float CrosshairVelocityFactor;
 	float CrosshairInAirFactor;
+	float CrosshairAimFactor;
+	float CrosshairShootingFactor;
 
 	FVector HitTarget;
-
+	FHUDPackage HUDPackage;
+	
 	/**
 	 * Aiming and FOV
 	 */
