@@ -168,6 +168,15 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	Character->bUseControllerRotationYaw = true;
 }
 
+void UCombatComponent::OnRep_EquippedWeapon()
+{
+	if (EquippedWeapon && Character)
+	{
+		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
+		Character->bUseControllerRotationYaw = true;
+	}
+}
+
 void UCombatComponent::SetAiming(bool bIsAiming)
 {
 	// Server_SetAiming has network delay so we are setting the bool here as well for cosmetic reasons.
@@ -190,29 +199,49 @@ void UCombatComponent::Server_SetAiming_Implementation(bool bIsAiming)
 	}
 }
 
-void UCombatComponent::OnRep_EquippedWeapon()
-{
-	if (EquippedWeapon && Character)
-	{
-		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
-		Character->bUseControllerRotationYaw = true;
-	}
-}
-
 void UCombatComponent::FireButtonPressed(bool bPressed)
 {
 	bFireButtonPressed = bPressed;
 
 	if (bFireButtonPressed)
 	{
-		FHitResult HitResult;
-		TraceUnderCrosshairs(HitResult);
-		Server_Fire(HitResult.ImpactPoint);
+		Fire();
+	}
+}
 
+void UCombatComponent::Fire()
+{
+	if (bCanFire)
+	{
 		if (EquippedWeapon)
 		{
+			Server_Fire(HitTarget);
+			StartFireTimer();
+
+			bCanFire = false;
+			
 			CrosshairShootingFactor = 0.75f;
 		}
+	}
+}
+
+void UCombatComponent::StartFireTimer()
+{
+	if (!EquippedWeapon || !Character) return;
+	Character->GetWorldTimerManager().SetTimer(
+		FireTimer,
+		this,
+		&UCombatComponent::FireTimerFinished,
+		EquippedWeapon->FireDelay);
+}
+
+void UCombatComponent::FireTimerFinished()
+{
+	if (!EquippedWeapon) return;
+	bCanFire = true;
+	if (bFireButtonPressed && EquippedWeapon->bAutomatic)
+	{
+		Fire();
 	}
 }
 
