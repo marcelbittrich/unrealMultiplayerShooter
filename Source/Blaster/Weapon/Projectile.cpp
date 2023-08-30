@@ -3,6 +3,8 @@
 
 #include "Weapon/Projectile.h"
 
+#include "Blaster.h"
+#include "BlasterCharacter.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -20,6 +22,7 @@ AProjectile::AProjectile()
 	CollisionBox->SetCollisionResponseToAllChannels(ECR_Ignore);
 	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECR_Block);
 	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECR_Block);
+	CollisionBox->SetCollisionResponseToChannel(ECC_SkeletalMesh, ECR_Block);
 
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile Movement Component"));
 	ProjectileMovementComponent->bRotationFollowsVelocity = true;
@@ -50,6 +53,11 @@ void AProjectile::BeginPlay()
 void AProjectile::OnHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp,
 	FVector NormalImpulse, const FHitResult& Hit)
 {
+	if (ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(Other))
+	{
+		BlasterCharacter->MulticastHit();
+	}
+	
 	Destroy();
 }
 
