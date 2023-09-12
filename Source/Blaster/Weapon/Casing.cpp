@@ -51,8 +51,6 @@ void ACasing::OnHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveCompon
 
 	// Deactivate collision to prevent further hit events.
 	CasingMesh->SetNotifyRigidBodyCollision(false);
-	
-	UE_LOG(LogTemp, Warning, TEXT("Shell Hit"));
 }
 
 void ACasing::Tick(float DeltaTime)

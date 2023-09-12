@@ -23,6 +23,11 @@ protected:
 	virtual void OnHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 private:
+	UFUNCTION(NetMulticast, Reliable)
+	void PlayHitEffects(bool HasHitEnemy);
+	
+	bool bEnemyHit;
+	
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* CollisionBox;
 
@@ -36,8 +41,12 @@ private:
 	class UParticleSystemComponent* TracerComponent;
 
 	UPROPERTY(EditAnywhere)
-	class UParticleSystem* ImpactParticles;
+	class UParticleSystem* MiscImpactParticles;
+	UPROPERTY(EditAnywhere)
+	class UParticleSystem* EnemyImpactParticles;
 
 	UPROPERTY(EditAnywhere)
-	class USoundCue* ImpactSound;
+	class USoundCue* MiscImpactSound;
+	UPROPERTY(EditAnywhere)
+	class USoundCue* EnemyImpactSound;
 };

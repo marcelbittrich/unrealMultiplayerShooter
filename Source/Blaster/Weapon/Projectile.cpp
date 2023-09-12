@@ -8,6 +8,7 @@
 #include "Components/BoxComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 #include "Sound/SoundCue.h"
 
 AProjectile::AProjectile()
@@ -56,19 +57,23 @@ void AProjectile::OnHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveCo
 	if (ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(Other))
 	{
 		BlasterCharacter->MulticastHit();
+		bEnemyHit = true;
+	}
+
+	if (HasAuthority())
+	{
+		
+		PlayHitEffects(bEnemyHit);
 	}
 	
 	Destroy();
 }
 
-void AProjectile::Tick(float DeltaTime)
+void AProjectile::PlayHitEffects_Implementation(bool HasHitEnemy)
 {
-	Super::Tick(DeltaTime);
-
-}
-
-void AProjectile::Destroyed()
-{
+	UParticleSystem* ImpactParticles = HasHitEnemy ? EnemyImpactParticles : MiscImpactParticles;
+	USoundCue* ImpactSound = HasHitEnemy ? EnemyImpactSound : MiscImpactSound;
+	
 	if (ImpactParticles)
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
@@ -77,7 +82,15 @@ void AProjectile::Destroyed()
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
 	}
+}
 
+void AProjectile::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
+void AProjectile::Destroyed()
+{
 	Super::Destroyed();
 }
 
